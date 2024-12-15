@@ -61,7 +61,7 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          IMAGE_TAG=feature-branch-${{ github.sha[:7] }}
+          IMAGE_TAG=feature-branch-${{ github.sha }}
           docker tag $IMAGE_REPO_NAME:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 

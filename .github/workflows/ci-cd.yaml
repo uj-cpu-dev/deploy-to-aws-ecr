@@ -23,6 +23,7 @@ jobs:
   generate-pipeline:
     runs-on: ubuntu-latest
     steps:
+      - id: generate-pipeline
       - uses: actions/checkout@v4
       - name: Install Python
         uses: actions/setup-python@v4
@@ -36,6 +37,7 @@ jobs:
   nodejs:
     name: Node.js Workflow
     runs-on: ubuntu-latest
+    if: steps.generate-pipeline.outcome == 'success'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -68,6 +70,7 @@ jobs:
   java:
     name: Java Workflow
     runs-on: ubuntu-latest
+    if: steps.generate-pipeline.outcome == 'success'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

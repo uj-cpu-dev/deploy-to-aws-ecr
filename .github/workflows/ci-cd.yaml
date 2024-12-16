@@ -19,73 +19,47 @@ permissions:
   actions: write
 
 jobs:
-  generate-pipeline:
+  build-and-test:
+    name: Build and Test
     runs-on: ubuntu-latest
-    outputs:
-      language: ${{ steps.detect-language.outputs.language }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Detect Language
-        id: detect-language
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+
+      - name: Install Required Python Packages
         run: |
-          if [ -f "package.json" ]; then
-            echo "nodejs" > language.txt
-          elif [ -f "pom.xml" ]; then
-            echo "java" > language.txt
-          else
-            echo "unknown" > language.txt
-          fi
-          cat language.txt
+          python -m pip install --upgrade pip
 
-      - name: Set Language Output
-        run: echo "::set-output name=language::$(cat language.txt)"
+      - name: Detect Project Type
+        id: detect-project
+        run: |
+          python scripts/detect_language.py > project_type.txt
+          language=$(cat project_type.txt)
+          echo "language=$language" >> $GITHUB_ENV
+        shell: bash
 
-  nodejs:
-    name: Node.js Workflow
-    needs: generate-pipeline
-    if: ${{ needs.generate-pipeline.outputs.language == 'nodejs' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Build and Test for Node.js
+        if: env.language == 'nodejs'
+        run: |
+          echo "Setting up Node.js environment..."
+          sudo apt-get update
+          curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          node --version
+          npm install
+          npm run lint
+          npm run test
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run Linter
-        run: npm run lint  # Replace with your linter command
-
-      - name: Run Tests
-        run: npm run test  # Replace with your test command
-
-  java:
-    name: Java Workflow
-    needs: generate-pipeline
-    if: ${{ needs.generate-pipeline.outputs.language == 'java' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Build and Test
-        run: mvn clean verify
+      - name: Build and Test for Java
+        if: env.language == 'java'
+        run: |
+          echo "Setting up Java environment..."
+          sudo apt-get update
+          sudo apt-get install -y openjdk-17-jdk maven
+          java --version
+          mvn clean verify

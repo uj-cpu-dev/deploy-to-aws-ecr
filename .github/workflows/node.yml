@@ -11,7 +11,7 @@ jobs:
  nodejs:
   name: Node.js Workflow
   runs-on: ubuntu-latest
-  needs: [generate-pipeline]
+  needs: []
   steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
     # Push Docker Image to ECR
   push-to-ecr:
     runs-on: ubuntu-latest
-    needs: [ generate-pipeline ]
+    needs: [nodejs]
     steps:
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2

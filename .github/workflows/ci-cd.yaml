@@ -19,15 +19,29 @@ permissions:
   actions: write
 
 jobs:
-  # 1. Generate Pipeline (Optional: Dynamic steps for scaffolding/config)
+  detect-language:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect language
+        run: |
+          if [ -f "package.json" ]; then
+            echo "nodejs"
+          elif [ -f "pom.xml" ]; then
+            echo "java"
+          else
+            echo "unknown"
+          fi
+      - id: language
+        outputs:
+          language: ${{ steps.detect-language.outputs }}
+
   generate-pipeline:
     runs-on: ubuntu-latest
+    if: needs.detect-language.outputs.language == 'nodejs'
     steps:
       - uses: actions/checkout@v4
       - name: Install Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Generate workflow files
-        run: |
-          python scripts/init.py  # Replace with your script

@@ -19,9 +19,12 @@ permissions:
   actions: write
 
 jobs:
-  build-and-test:
-    name: Build and Test
+  # 1. Generate Pipeline
+  generate-pipeline:
+    name: Generate Pipeline
     runs-on: ubuntu-latest
+    outputs:
+      language: ${{ steps.detect.outputs.language }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -31,35 +34,75 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install Required Python Packages
-        run: |
-          python -m pip install --upgrade pip
-
       - name: Detect Project Type
-        id: detect-project
+        id: detect
         run: |
           python scripts/detect_language.py > project_type.txt
           language=$(cat project_type.txt)
-          echo "language=$language" >> $GITHUB_ENV
-        shell: bash
+          echo "language=$language"
+          echo "::set-output name=language::$language"
 
-      - name: Build and Test for Node.js
-        if: env.language == 'nodejs'
+  # 2. Run Tests
+  run-tests:
+    name: Run Tests
+    needs: generate-pipeline
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Environment and Run Tests
+        if: needs.generate-pipeline.outputs.language == 'nodejs'
         run: |
-          echo "Setting up Node.js environment..."
-          sudo apt-get update
+          echo "Running Node.js tests"
           curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
           sudo apt-get install -y nodejs
-          node --version
           npm install
           npm run lint
           npm run test
 
-      - name: Build and Test for Java
-        if: env.language == 'java'
+      - name: Set up Java and Run Tests
+        if: needs.generate-pipeline.outputs.language == 'java'
         run: |
-          echo "Setting up Java environment..."
+          echo "Running Java tests"
           sudo apt-get update
           sudo apt-get install -y openjdk-17-jdk maven
-          java --version
           mvn clean verify
+
+  # 3. Build
+  build:
+    name: Build Application
+    needs: run-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image for Node.js
+        if: needs.generate-pipeline.outputs.language == 'nodejs'
+        run: |
+          docker build -t $IMAGE_REPO_NAME:latest .
+
+      - name: Build Docker Image for Java
+        if: needs.generate-pipeline.outputs.language == 'java'
+        run: |
+          docker build -t $IMAGE_REPO_NAME:latest .
+
+      - name: Tag Docker Image
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker tag $IMAGE_REPO_NAME:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+  # 4. Push to ECR
+  push-to-ecr:
+    name: Push to Amazon ECR
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG

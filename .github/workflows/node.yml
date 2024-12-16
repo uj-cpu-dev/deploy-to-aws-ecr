@@ -1,0 +1,32 @@
+# Node.js Specific Workflow
+nodejs:
+  name: Node.js Workflow
+  runs-on: ubuntu-latest
+  needs: [generate-pipeline]
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run Linter
+      run: npm run lint  # Replace with your linter command
+
+    - name: Run Tests
+      run: npm run test  # Replace with your test command
+
+    - name: Build Docker image
+      run: |
+        docker build -t $IMAGE_REPO_NAME:latest .
+
+    - name: Tag Docker image
+      run: |
+        IMAGE_TAG=feature-branch-${{ github.sha }}
+        docker tag $IMAGE_REPO_NAME:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV

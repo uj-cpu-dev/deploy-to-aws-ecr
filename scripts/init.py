@@ -17,7 +17,7 @@ def write_nodejs_workflow():
           - name: Install dependencies
             run: npm install
     """
-    with open(".github/workflows/nodejs.yml", "w") as f:
+    with open(".github/workflows/node.yml", "w") as f:
         f.write(workflow)
 
 def write_java_workflow():

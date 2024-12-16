@@ -39,13 +39,12 @@ jobs:
           cat language.txt
 
       - name: Set Language Output
-        id: set-output
         run: echo "::set-output name=language::$(cat language.txt)"
 
   nodejs:
     name: Node.js Workflow
     needs: generate-pipeline
-    if: needs.generate-pipeline.outputs.language == 'nodejs'
+    if: ${{ needs.generate-pipeline.outputs.language == 'nodejs' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -68,7 +67,7 @@ jobs:
   java:
     name: Java Workflow
     needs: generate-pipeline
-    if: needs.generate-pipeline.outputs.language == 'java'
+    if: ${{ needs.generate-pipeline.outputs.language == 'java' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

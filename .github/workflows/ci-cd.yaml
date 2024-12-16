@@ -39,6 +39,7 @@ jobs:
   nodejs:
     name: Node.js Workflow
     if: needs.generate-pipeline.outputs.language == 'nodejs'
+    needs: [generate-pipeline]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

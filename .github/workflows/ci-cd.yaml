@@ -32,7 +32,6 @@ jobs:
         run: |
           python scripts/init.py  # Replace with your script
 
-
   # Push Docker Image to ECR
   push-to-ecr:
     runs-on: ubuntu-latest

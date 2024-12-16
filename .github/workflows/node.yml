@@ -1,4 +1,12 @@
-# Node.js Specific Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 nodejs:
   name: Node.js Workflow
   runs-on: ubuntu-latest

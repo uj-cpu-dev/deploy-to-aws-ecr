@@ -31,15 +31,3 @@ jobs:
       - name: Generate workflow files
         run: |
           python scripts/init.py  # Replace with your script
-
-  # Push Docker Image to ECR
-  push-to-ecr:
-    runs-on: ubuntu-latest
-    needs: [generate-pipeline]
-    steps:
-      - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Push Docker image to ECR
-        run: |
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG

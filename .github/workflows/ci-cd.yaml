@@ -37,7 +37,7 @@ jobs:
       - name: Detect Project Type
         id: detect
         run: |
-          python scripts/detect_language.py > project_type.txt
+          python scripts/init.py > project_type.txt
           language=$(cat project_type.txt)
           echo "language=$language"
           echo "::set-output name=language::$language"

@@ -36,7 +36,7 @@ jobs:
   # Push Docker Image to ECR
   push-to-ecr:
     runs-on: ubuntu-latest
-    needs: [nodejs, java]
+    needs: [generate-pipeline]
     steps:
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2

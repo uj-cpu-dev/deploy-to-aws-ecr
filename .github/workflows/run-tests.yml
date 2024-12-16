@@ -1,0 +1,32 @@
+name: Run Tests
+
+on:
+  workflow_call:
+    inputs:
+      language:
+        required: true
+        type: string
+
+jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Node.js Tests
+        if: ${{ inputs.language == 'nodejs' }}
+        run: |
+          curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          npm install
+          npm run lint
+          npm run test
+
+      - name: Run Java Tests
+        if: ${{ inputs.language == 'java' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-17-jdk maven
+          mvn clean verify

@@ -32,6 +32,6 @@ jobs:
           else
             echo "unknown"
           fi
-      - id: language
-        outputs:
-          language: ${{ steps.detect-language.outputs }}
+      - name: Set Language Output
+        id: language
+        run: echo "::set-output name=language::$(cat <<<'${{ steps.detect-language.outputs }}')"

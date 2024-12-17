@@ -106,4 +106,4 @@ jobs:
 
       - name: Push Docker Image
         run: |
-          docker push ${{ evn.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+          docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG

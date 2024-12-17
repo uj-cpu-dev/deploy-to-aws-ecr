@@ -37,9 +37,15 @@ jobs:
       - name: Detect Project Type
         id: detect
         run: |
-          project_type=$(python uj-cpu-dev/deploy-to-aws-ecr/scripts/init.py)
-          echo "project_type=$project_type" >> $GITHUB_ENV
-          echo "::set-output name=project_type::$project_type"
+          if [ -f "package.json" ]; then
+            echo "nodejs"
+          elif [ -f "pom.xml" ]; then
+            echo "java"
+          else
+            echo "unknown"
+          fi > project_type.txt
+          language=$(cat project_type.txt)
+          echo "::set-output name=language::$language"
 
   # 2. Run Tests
   run-tests:

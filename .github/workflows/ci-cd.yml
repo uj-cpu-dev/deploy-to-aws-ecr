@@ -37,7 +37,7 @@ jobs:
       - name: Detect Project Type
         id: detect
         run: |
-          project_type=$(python scripts/init.py)
+          project_type=$(python uj-cpu-dev/deploy-to-aws-ecr/scripts/init.py)
           echo "project_type=$project_type" >> $GITHUB_ENV
           echo "::set-output name=project_type::$project_type"
 

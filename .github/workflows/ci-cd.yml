@@ -37,10 +37,9 @@ jobs:
       - name: Detect Project Type
         id: detect
         run: |
-          python scripts/init.py > project_type.txt
-          language=$(cat project_type.txt)
-          echo "language=$language"
-          echo "::set-output name=language::$language"
+          project_type=$(python scripts/init.py)
+          echo "project_type=$project_type" >> $GITHUB_ENV
+          echo "::set-output name=project_type::$project_type"
 
   # 2. Run Tests
   run-tests:

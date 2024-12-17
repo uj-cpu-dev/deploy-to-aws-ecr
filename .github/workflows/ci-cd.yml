@@ -3,6 +3,9 @@ name: CI/CD Pipeline
 on:
   workflow_call:
     inputs:
+      language:
+        required: true
+        type: string
 
 env:
   ECR_REGION: us-east-1
@@ -21,7 +24,7 @@ jobs:
     name: Generate Pipeline
     runs-on: ubuntu-latest
     outputs:
-      language: ${{ steps.detect.outputs.language }}
+      language: ${{ inputs.language }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

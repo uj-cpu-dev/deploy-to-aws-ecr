@@ -24,39 +24,39 @@ jobs:
     name: Generate Pipeline
     runs-on: ubuntu-latest
     outputs:
-      language: ${{ inputs.language }}
+      language: ${{ steps.detect.outputs.language }}
+      java_version: ${{ steps.extract-java.outputs.version }}
+      node_version: ${{ steps.extract-node.outputs.version }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4  # Updated to the latest version
         with:
-          python-version: 3.9
+          python-version: '3.9'
 
       - name: Detect Project Type
         id: detect
         run: |
           if [ -f "package.json" ]; then
-            echo "nodejs"
+            echo "language=nodejs" >> $GITHUB_OUTPUT
           elif [ -f "pom.xml" ]; then
-            echo "java"
+            echo "language=java" >> $GITHUB_OUTPUT
           elif [ -f "build.gradle" ]; then 
-            echo "gradle"
+            echo "language=gradle" >> $GITHUB_OUTPUT
           elif [ -f "go.mod" ]; then
-            echo "go"
+            echo "language=go" >> $GITHUB_OUTPUT
           else
-            echo "unknown"
+            echo "language=unknown" >> $GITHUB_OUTPUT
           fi
-          echo "::set-output name=language::$(cat <<<'${{ steps.detect-language.outputs }}')" 
 
       - name: Extract Java Version
         if: steps.detect.outputs.language == 'java'
         id: extract-java
         run: |
           JAVA_VERSION=$(grep '<java.version>' pom.xml | head -n 1 | sed 's/.*<java.version>\(.*\)<\/java.version>.*/\1/')
-          echo "Java version extracted: $JAVA_VERSION"
-          echo "::set-output name=version::$JAVA_VERSION"
+          echo "version=$JAVA_VERSION" >> $GITHUB_OUTPUT
 
       - name: Extract Node.js Version
         if: steps.detect.outputs.language == 'nodejs'
@@ -66,8 +66,7 @@ jobs:
           if [ -z "$NODE_VERSION" ]; then
             NODE_VERSION="16"  # Default version if not specified
           fi
-          echo "Node.js version extracted: $NODE_VERSION"
-          echo "::set-output name=version::$NODE_VERSION"
+          echo "version=$NODE_VERSION" >> $GITHUB_OUTPUT
 
   # 2. Run Tests
   run-tests:
@@ -78,42 +77,28 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Environment and Run Tests
+      - name: Set up Node.js and Run Tests
         if: needs.generate-pipeline.outputs.language == 'nodejs'
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ needs.generate-pipeline.outputs.node_version }}
         run: |
           echo "Running Node.js tests"
-          curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-          sudo apt-get install -y nodejs
           npm install
           npm run lint
           npm run test
 
       - name: Set up Java and Run Tests
-        needs: generate-pipeline
         if: needs.generate-pipeline.outputs.language == 'java'
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout Repository
-            uses: actions/checkout@v4
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ needs.generate-pipeline.outputs.java_version }}
+        run: |
+          echo "Running Java tests"
+          mvn clean verify
 
-          - name: Set up Java
-            uses: actions/setup-java@v3
-            with:
-              distribution: 'temurin'
-              java-version: ${{ needs.generate-pipeline.outputs.java_version }}
-
-          - name: Cache Maven Dependencies
-            uses: actions/cache@v3
-            with:
-              path: ~/.m2/repository
-              key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-              restore-keys: |
-                ${{ runner.os }}-maven-
-
-          - name: Build and Test
-            run: mvn clean verify
-
-  # 3. Build
+  # 3. Build Docker Image
   build:
     name: Build Application
     needs: run-tests
@@ -122,13 +107,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Build Docker Image for Node.js
-        if: needs.generate-pipeline.outputs.language == 'nodejs'
-        run: |
-          docker build -t $IMAGE_REPO_NAME:latest .
-
-      - name: Build Docker Image for Java
-        if: needs.generate-pipeline.outputs.language == 'java'
+      - name: Build Docker Image
         run: |
           docker build -t $IMAGE_REPO_NAME:latest .
 
@@ -138,7 +117,7 @@ jobs:
           docker tag $IMAGE_REPO_NAME:latest ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-  # 4. Push to ECR
+  # 4. Push to Amazon ECR
   push-to-ecr:
     name: Push to Amazon ECR
     needs: build

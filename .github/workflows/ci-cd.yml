@@ -70,11 +70,13 @@ jobs:
           npm run test
 
       - name: Set up Java and Run Tests
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: $(grep '<java.version>' pom.xml | cut -d'>' -f2 | cut -d'<' -f1)
         if: needs.generate-pipeline.outputs.language == 'java'
         run: |
           echo "Running Java tests"
-          sudo apt-get update
-          sudo apt-get install -y openjdk-17-jdk maven
           mvn clean verify
 
   # 3. Build

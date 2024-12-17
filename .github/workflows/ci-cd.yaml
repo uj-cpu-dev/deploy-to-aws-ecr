@@ -9,9 +9,8 @@ on:
       - main
 
 env:
-  ECR_REGION: us-east-1
-  IMAGE_REPO_NAME: my-app
-  IMAGE_TAG: 1.0.0
+  ECR_REGION: us-east-1  # Replace with your AWS region
+  IMAGE_REPO_NAME: my-app  # Replace with your ECR repository name
 
 permissions:
   contents: read
@@ -22,25 +21,88 @@ permissions:
 jobs:
   # 1. Generate Pipeline
   generate-pipeline:
-    uses: ./.github/workflows/generate-pipeline.yml
+    name: Generate Pipeline
+    runs-on: ubuntu-latest
+    outputs:
+      language: ${{ steps.detect.outputs.language }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+
+      - name: Detect Project Type
+        id: detect
+        run: |
+          python scripts/init.py > project_type.txt
+          language=$(cat project_type.txt)
+          echo "language=$language"
+          echo "::set-output name=language::$language"
 
   # 2. Run Tests
   run-tests:
+    name: Run Tests
     needs: generate-pipeline
-    uses: ./.github/workflows/run-tests.yml
-    with:
-      language: ${{ needs.generate-pipeline.outputs.language }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Environment and Run Tests
+        if: needs.generate-pipeline.outputs.language == 'nodejs'
+        run: |
+          echo "Running Node.js tests"
+          curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          npm install
+          npm run lint
+          npm run test
+
+      - name: Set up Java and Run Tests
+        if: needs.generate-pipeline.outputs.language == 'java'
+        run: |
+          echo "Running Java tests"
+          sudo apt-get update
+          sudo apt-get install -y openjdk-17-jdk maven
+          mvn clean verify
 
   # 3. Build
   build:
+    name: Build Application
     needs: run-tests
-    uses: ./.github/workflows/build.yml
-    with:
-      language: ${{ needs.run-tests.inputs.language }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image for Node.js
+        if: needs.generate-pipeline.outputs.language == 'nodejs'
+        run: |
+          docker build -t $IMAGE_REPO_NAME:latest .
+
+      - name: Build Docker Image for Java
+        if: needs.generate-pipeline.outputs.language == 'java'
+        run: |
+          docker build -t $IMAGE_REPO_NAME:latest .
+
+      - name: Tag Docker Image
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker tag $IMAGE_REPO_NAME:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
   # 4. Push to ECR
   push-to-ecr:
+    name: Push to Amazon ECR
     needs: build
-    uses: ./.github/workflows/push-to-ecr.yml
-    with:
-      image_tag: ${{ env.IMAGE_TAG }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG

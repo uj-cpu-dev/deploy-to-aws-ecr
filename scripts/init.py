@@ -10,4 +10,4 @@ def detect_language():
 
 if __name__ == "__main__":
     language = detect_language()
-    print(language)  # Outputs the language to standard output
+    print(language)

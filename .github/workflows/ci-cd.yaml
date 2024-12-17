@@ -9,8 +9,9 @@ on:
       - main
 
 env:
-  ECR_REGION: us-east-1  # Replace with your AWS region
-  IMAGE_REPO_NAME: my-app  # Replace with your ECR repository name
+  ECR_REGION: us-east-1
+  IMAGE_REPO_NAME: 992382383822.dkr.ecr.us-east-1.amazonaws.com/my-java-app
+  AWS_ACCOUNT_ID: 992382383822
 
 permissions:
   contents: read
@@ -91,7 +92,7 @@ jobs:
       - name: Tag Docker Image
         run: |
           IMAGE_TAG=${{ github.sha }}
-          docker tag $IMAGE_REPO_NAME:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+          docker tag $IMAGE_REPO_NAME:latest ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
   # 4. Push to ECR
@@ -105,4 +106,4 @@ jobs:
 
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+          docker push ${{ evn.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG

@@ -112,7 +112,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t $IMAGE_REPO_NAME:latest .
+          docker build --build-arg JAVA_VERSION=${{ needs.generate-pipeline.outputs.java_version }} -t $IMAGE_REPO_NAME:latest .
 
       - name: Tag Docker Image
         run: |

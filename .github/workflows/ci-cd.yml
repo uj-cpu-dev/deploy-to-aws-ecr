@@ -112,6 +112,10 @@ jobs:
 
       - name: Build Docker Image
         run: |
+          JAVA_VERSION=${{ needs.generate-pipeline.outputs.java_version }}
+          if [ -z "$JAVA_VERSION" ]; then
+          JAVA_VERSION=17  # Default Java version
+          fi
           docker build --build-arg JAVA_VERSION=${{ needs.generate-pipeline.outputs.java_version }} -t $IMAGE_REPO_NAME:latest .
 
       - name: Tag Docker Image

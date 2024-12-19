@@ -121,7 +121,7 @@ jobs:
       - name: Tag Docker Image
         run: |
           IMAGE_TAG=${{ github.sha }}
-          docker tag $IMAGE_REPO_NAME:latest ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+          docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
   # 4. Push to Amazon ECR
@@ -132,7 +132,10 @@ jobs:
     steps:
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: private
+          skip-logout: false
 
       - name: Push Docker Image
         run: |
-          docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.ECR_REGION }}.amazonaws.com/$IMAGE_REPO_NA
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest

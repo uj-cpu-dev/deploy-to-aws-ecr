@@ -130,6 +130,14 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::992382383822:role/GithubActionRole
+          aws-region: $AWS_REGION
+
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
         with:

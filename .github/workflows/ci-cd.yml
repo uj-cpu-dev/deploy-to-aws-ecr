@@ -124,9 +124,8 @@ jobs:
 
       - name: Generate Image Tag
         run: |
-          FEATURE_BRANCH=${GITHUB_REF##*/}  # Extract feature branch name
           COMMIT_SHA=$(git rev-parse --short HEAD)  # Get first 7 characters of commit SHA
-          IMAGE_TAG="${FEATURE_BRANCH}-${COMMIT_SHA:0:7}"
+          IMAGE_TAG=feature-branch-${COMMIT_SHA:0:7}"
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Push Docker Image

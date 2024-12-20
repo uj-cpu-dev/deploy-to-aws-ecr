@@ -110,17 +110,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Build Docker Image
+      - name: Build and Tag Docker Image
         run: |
           JAVA_VERSION=${{ needs.generate-pipeline.outputs.java_version }}
           if [ -z "$JAVA_VERSION" ]; then
           JAVA_VERSION=17  # Default Java version
           fi
           docker build -t $IMAGE_REPO_NAME:latest .
-
-      - name: Tag Docker Image
-        run: |
-          IMAGE_TAG=${{ github.sha }}
           docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 

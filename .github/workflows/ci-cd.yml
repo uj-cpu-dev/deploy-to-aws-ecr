@@ -104,7 +104,7 @@ jobs:
   # 3. Push to Amazon ECR
   push-to-ecr:
     name: Build Tag and Push to Amazon ECR
-    needs: build
+    needs: run-tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

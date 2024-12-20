@@ -9,7 +9,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  IMAGE_REPO_NAME: 992382383822.dkr.ecr.us-east-1.amazonaws.com/my-java-app
+  IMAGE_REPO_NAME: my-java-app
   AWS_ACCOUNT_ID: 992382383822
 
 permissions:

@@ -124,11 +124,7 @@ jobs:
 
       - name: Push Docker Image
         run: |
-          # Build Docker image
           docker build -t $IMAGE_REPO_NAME:latest .
-
-          # Tag the Docker image with the full ECR URI
-          docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
-
-          # Push the Docker image to ECR
-          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$GITHUB_ENV
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$GITHUB_ENV

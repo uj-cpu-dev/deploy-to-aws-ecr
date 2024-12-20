@@ -122,9 +122,15 @@ jobs:
           registry-type: private
           skip-logout: false
 
+      - name: Generate Image Tag
+        run: |
+          FEATURE_BRANCH=${GITHUB_REF##*/}  # Extract feature branch name
+          COMMIT_SHA=$(git rev-parse --short HEAD)  # Get first 7 characters of commit SHA
+          IMAGE_TAG="${FEATURE_BRANCH}-${COMMIT_SHA:0:7}"
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
       - name: Push Docker Image
         run: |
-          docker build -t $IMAGE_REPO_NAME:latest .
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-          docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$GITHUB_ENV
-          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$GITHUB_ENV
+          docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+          docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG

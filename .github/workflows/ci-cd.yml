@@ -36,4 +36,4 @@ jobs:
 
       - name: Debug Workflow Path
         run: |
-          ls -la
+          ls -la ${{ github.action_path }}

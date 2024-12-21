@@ -32,5 +32,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Workflow Repository
-      - uses: actions/checkout@v4
-      - run: ls
+        uses: actions/checkout@v4
+
+      - name: Debug Workflow Path
+        working-directory: ${{ github.action_path }}
+        run: |
+          echo "Workflow path: ${{ github.action_path }}"
+          ls -la ${{ github.action_path }}

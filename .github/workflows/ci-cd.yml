@@ -33,16 +33,4 @@ jobs:
     steps:
       - name: Checkout Workflow Repository
         uses: actions/checkout@v4
-        with:
-          repository: ${{ github.action_path }}
-          ref: ${{ github.ref }}
-
-      - name: Debug Workflow Path
-        run: |
-          echo "Workflow path: ${{ github.action_path }}"
-          ls -la ${{ github.action_path }}
-
-      - name: Debug Terraform Directory
-        run: |
-          echo "Checking Terraform directory:"
-          ls -la ${{ github.action_path }}/deploy_scripts
+        run: ls

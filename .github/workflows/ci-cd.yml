@@ -31,15 +31,60 @@ jobs:
     name: Terraform Provisioning
     runs-on: ubuntu-latest
     steps:
-      # Checkout the repository
       - name: Checkout Workflow Repository
         uses: actions/checkout@v4
         with:
-          repository: uj-cpu-dev/deploy-to-aws-ecr # Replace with your reusable workflow repo
-          ref: main # Adjust to the branch/tag where your workflow resides
+          repository: uj-cpu-dev/deploy-to-aws-ecr
+          ref: main
 
       - name: Debug Entire Directory
         working-directory: terraform
         run: |
           echo "Listing all directories:"
           ls -la
+
+  generate-pipeline:
+    name: Generate Pipeline
+    needs: terraform-provision
+    runs-on: ubuntu-latest
+    outputs:
+      language: ${{ steps.detect.outputs.language }}
+      java_version: ${{ steps.extract-java.outputs.version }}
+      node_version: ${{ steps.extract-node.outputs.version }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5  # Updated to latest version
+        with:
+          python-version: '3.9'
+
+      - name: Detect Project Type
+        id: detect
+        run: |
+          if [ -f "package.json" ]; then
+            echo "language=nodejs" >> $GITHUB_OUTPUT
+          elif [ -f "pom.xml" ]; then
+            echo "language=java" >> $GITHUB_OUTPUT
+          elif [ -f "build.gradle" ]; then 
+            echo "language=gradle" >> $GITHUB_OUTPUT
+          elif [ -f "go.mod" ]; then
+            echo "language=go" >> $GITHUB_OUTPUT
+          else
+            echo "language=unknown" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract Java Version
+        if: steps.detect.outputs.language == 'java'
+        id: extract-java
+        run: |
+          JAVA_VERSION=$(grep '<java.version>' pom.xml | head -n 1 | sed 's/.*<java.version>\(.*\)<\/java.version>.*/\1/')
+          echo "version=$JAVA_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Extract Node.js Version
+        if: steps.detect.outputs.language == 'nodejs'
+        id: extract-node
+        run: |
+          NODE_VERSION=$(jq -r '.engines.node // "16"' package.json)
+          echo "version=$NODE_VERSION" >> $GITHUB_OUTPUT

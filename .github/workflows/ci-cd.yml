@@ -34,7 +34,7 @@ jobs:
       - name: Checkout Workflow Repository
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository }}  # This ensures the workflow repository is checked out
+          repository: ${{ github.action_path }}
           ref: ${{ github.ref }}
 
       - name: Debug Workflow Path

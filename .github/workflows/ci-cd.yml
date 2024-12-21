@@ -27,159 +27,19 @@ permissions:
   actions: write
 
 jobs:
-  # 1. Generate Pipeline
-  generate-pipeline:
-    name: Generate Pipeline
-    runs-on: ubuntu-latest
-    outputs:
-      language: ${{ steps.detect.outputs.language }}
-      java_version: ${{ steps.extract-java.outputs.version }}
-      node_version: ${{ steps.extract-node.outputs.version }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5  # Updated to latest version
-        with:
-          python-version: '3.9'
-
-      - name: Detect Project Type
-        id: detect
-        run: |
-          if [ -f "package.json" ]; then
-            echo "language=nodejs" >> $GITHUB_OUTPUT
-          elif [ -f "pom.xml" ]; then
-            echo "language=java" >> $GITHUB_OUTPUT
-          elif [ -f "build.gradle" ]; then 
-            echo "language=gradle" >> $GITHUB_OUTPUT
-          elif [ -f "go.mod" ]; then
-            echo "language=go" >> $GITHUB_OUTPUT
-          else
-            echo "language=unknown" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Extract Java Version
-        if: steps.detect.outputs.language == 'java'
-        id: extract-java
-        run: |
-          JAVA_VERSION=$(grep '<java.version>' pom.xml | head -n 1 | sed 's/.*<java.version>\(.*\)<\/java.version>.*/\1/')
-          echo "version=$JAVA_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Extract Node.js Version
-        if: steps.detect.outputs.language == 'nodejs'
-        id: extract-node
-        run: |
-          NODE_VERSION=$(jq -r '.engines.node // "16"' package.json)
-          echo "version=$NODE_VERSION" >> $GITHUB_OUTPUT
-
-  # 2. Run Tests
-  run-tests:
-    name: Run Tests
-    needs: generate-pipeline
+  terraform-provision:
+    name: Terraform Provisioning
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        if: needs.generate-pipeline.outputs.language == 'nodejs'
-        uses: actions/setup-node@v4  # Updated version
-        with:
-          node-version: ${{ needs.generate-pipeline.outputs.node_version }}
-
-      - name: Run Node.js Tests
-        if: needs.generate-pipeline.outputs.language == 'nodejs'
-        run: |
-          echo "Running Node.js tests"
-          npm install
-          npm run lint
-          npm run test
-
-      - name: Set up Java
-        if: needs.generate-pipeline.outputs.language == 'java'
-        uses: actions/setup-java@v4  # Updated version
-        with:
-          distribution: 'temurin'
-          java-version: ${{ needs.generate-pipeline.outputs.java_version }}
-
-      - name: Run Java Tests
-        if: needs.generate-pipeline.outputs.language == 'java'
-        run: |
-          echo "Running Java tests"
-          mvn clean verify
-
-  set-up-terraform:
-    needs: run-tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_wrapper: false
-
       - name: Checkout Workflow Repository
         uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository }}  # This ensures the workflow repository is checked out
-          path: ${{ github.action_path }}
+
+      - name: Debug Workflow Path
+        run: |
+          echo "Workflow path: ${{ github.action_path }}"
+          ls -la ${{ github.action_path }}
 
       - name: Debug Terraform Directory
-        run: ls -la ${{ github.action_path }}/terraform
-
-      - name: Terraform Init
-        shell: bash
         run: |
-          set -eux
-          terraform init -upgrade -reconfigure \
-          -backend-config='skip_metadata_api_check=true' \
-          -backend-config='skip_region_validation=true' \
-          -backend-config='skip_credentials_validation=true' \
-          -backend-config='region=$AWS_REGION' \
-          -backend-config='bucket=${{ inputs.backend_s3_bucket }}' \
-          -backend-config='key=docker-ecr/terraform-$IMAGE_REPO_NAME.tfstate' \
-          -backend-config='dynamodb_table=${{ inputs.backend_dynamodb_table }}' \
-        working-directory: ${{ github.action_path }}/terraform
-
-      - name: Terraform Apply
-        shell: bash
-        run: |
-          set -eux
-          terraform apply \
-          -var 'repository_name=$IMAGE_REPO_NAME' \
-          -var 'aws_account_id=$AWS_ACCOUNT_ID' \
-          -auto-approve
-        working-directory: ${{ github.action_path }}/terraform
-
-  # 3. Push to Amazon ECR
-  push-to-ecr:
-    name: Build Tag and Push to Amazon ECR
-    needs: set-up-terraform
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: arn:aws:iam::992382383822:role/github-actions-runner
-          audience: sts.amazonaws.com
-          aws-region: us-east-1
-
-      - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registry-type: private
-          skip-logout: false
-
-      - name: Generate Image Tag
-        run: |
-          COMMIT_SHA=$(git rev-parse --short HEAD)  # Get first 7 characters of commit SHA
-          IMAGE_TAG=feature-branch-${COMMIT_SHA:0:7}
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-
-      - name: Push Docker Image
-        run: |
-          docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
-          docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+          echo "Checking Terraform directory:"
+          ls -la ${{ github.action_path }}/terraform

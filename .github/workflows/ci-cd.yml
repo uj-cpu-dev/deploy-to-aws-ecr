@@ -36,10 +36,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: uj-cpu-dev/deploy-to-aws-ecr # Replace with your reusable workflow repo
-          ref: main # Adjust to the branch/tag where your workflow resides
+          ref: develop # Adjust to the branch/tag where your workflow resides
 
-      # Debug the entire directory structure
       - name: Debug Entire Directory
         run: |
           echo "Listing all directories:"
-          ls -la .
+          ls -la

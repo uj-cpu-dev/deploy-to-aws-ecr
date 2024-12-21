@@ -130,7 +130,7 @@ jobs:
           -backend-config='bucket=${{ inputs.backend_s3_bucket }}' \
           -backend-config='key=docker-ecr/terraform-$IMAGE_REPO_NAME.tfstate' \
           -backend-config='dynamodb_table=${{ inputs.backend_dynamodb_table }}' \
-        working-directory: ${{ github.action_path }}/terraform
+        working-directory: ${{ github.workspace }}/terraform
 
       - name: Terraform Apply
         shell: bash
@@ -140,7 +140,7 @@ jobs:
           -var 'repository_name=$IMAGE_REPO_NAME' \
           -var 'aws_account_id=$AWS_ACCOUNT_ID' \
           -auto-approve
-        working-directory: ${{ github.action_path }}/terraform
+        working-directory: ${{ github.workspace }}/terraform
 
   # 3. Push to Amazon ECR
   push-to-ecr:

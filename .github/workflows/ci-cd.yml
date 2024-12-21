@@ -39,6 +39,7 @@ jobs:
           ref: main # Adjust to the branch/tag where your workflow resides
 
       - name: Debug Entire Directory
+        working-directory: terraform
         run: |
           echo "Listing all directories:"
           ls -la

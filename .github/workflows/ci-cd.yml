@@ -118,6 +118,15 @@ jobs:
         with:
           terraform_wrapper: false
 
+      - name: Checkout Workflow Repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}  # This ensures the workflow repository is checked out
+          path: ${{ github.action_path }}
+
+      - name: Debug Terraform Directory
+        run: ls -la ${{ github.action_path }}/terraform
+
       - name: Terraform Init
         shell: bash
         run: |
@@ -130,7 +139,7 @@ jobs:
           -backend-config='bucket=${{ inputs.backend_s3_bucket }}' \
           -backend-config='key=docker-ecr/terraform-$IMAGE_REPO_NAME.tfstate' \
           -backend-config='dynamodb_table=${{ inputs.backend_dynamodb_table }}' \
-        working-directory: ${{ github.workspace }}/terraform
+        working-directory: ${{ github.action_path }}/terraform
 
       - name: Terraform Apply
         shell: bash
@@ -140,7 +149,7 @@ jobs:
           -var 'repository_name=$IMAGE_REPO_NAME' \
           -var 'aws_account_id=$AWS_ACCOUNT_ID' \
           -auto-approve
-        working-directory: ${{ github.workspace }}/terraform
+        working-directory: ${{ github.action_path }}/terraform
 
   # 3. Push to Amazon ECR
   push-to-ecr:

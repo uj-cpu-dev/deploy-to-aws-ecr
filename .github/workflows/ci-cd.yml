@@ -37,4 +37,4 @@ jobs:
       - name: Debug Workflow Path
         working-directory: ${{ github.action_path }}
         run: |
-          ls -la
+          ls -la deploy_scripts

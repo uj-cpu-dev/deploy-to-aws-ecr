@@ -34,4 +34,4 @@ jobs:
       - name: Debug Entire Directory
         run: |
           echo "Listing all directories:"
-          ls -la /github/workspace
+          ls -la .

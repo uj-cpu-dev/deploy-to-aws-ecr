@@ -31,11 +31,7 @@ jobs:
     name: Terraform Provisioning
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Workflow Repository
-        uses: actions/checkout@v4
-
-      - name: Debug Workflow Path
+      - name: Debug Entire Directory
         run: |
-          cd ..
-          cd ..
-          ls -la _actions
+          echo "Listing all directories:"
+          ls -la /github/workspace

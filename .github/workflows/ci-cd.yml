@@ -45,4 +45,4 @@ jobs:
       - name: Debug Terraform Directory
         run: |
           echo "Checking Terraform directory:"
-          ls -la ${{ github.action_path }}./terraform
+          ls -la ${{ github.action_path }}/terraform

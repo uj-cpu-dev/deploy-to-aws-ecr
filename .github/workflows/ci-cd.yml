@@ -145,7 +145,7 @@ jobs:
   # 3. Push to Amazon ECR
   push-to-ecr:
     name: Build Tag and Push to Amazon ECR
-    needs: run-tests
+    needs: set-up-terraform
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

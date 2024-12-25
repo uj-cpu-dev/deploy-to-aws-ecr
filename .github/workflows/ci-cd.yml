@@ -46,6 +46,7 @@ jobs:
           repository: uj-cpu-dev/deploy-to-aws-ecr
           ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
+          path: cloned-repo
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -53,9 +54,10 @@ jobs:
           python-version: '3.9'
 
       - name: Install Python dependencies
+        working-directory: cloned-repo
         run: pip install -r scripts/requirements.txt
       
       - name: Set up
         id: detect
-        working-directory: scripts
-        run: python3 detect_script.py
+        working-directory: cloned-repo/scripts
+        run: python3 detect_project.py

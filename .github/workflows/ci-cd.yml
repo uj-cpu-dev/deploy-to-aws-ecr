@@ -54,4 +54,5 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install -r scripts/requirements.txt
+          cd ..
           python scripts/detect_language.py

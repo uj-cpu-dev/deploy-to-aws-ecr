@@ -54,4 +54,4 @@ jobs:
           python-version: '3.9'
 
       - name: Install Python dependencies
-        run: ls ${{ env.DEVOPS_DIR }}
+        run: pip install -r ${{ env.DEVOPS_DIR }}/scripts/requirements.txt

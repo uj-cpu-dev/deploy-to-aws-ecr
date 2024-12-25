@@ -27,25 +27,8 @@ permissions:
   actions: write
 
 jobs:
-  terraform-provision:
-    name: Terraform Provisioning
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Workflow Repository
-        uses: actions/checkout@v4
-        with:
-          repository: uj-cpu-dev/deploy-to-aws-ecr
-          ref: main
-
-      - name: Debug Entire Directory
-        working-directory: terraform
-        run: |
-          echo "Listing all directories:"
-          ls -la
-
   generate-pipeline:
     name: Generate Pipeline
-    needs: terraform-provision
     runs-on: ubuntu-latest
     outputs:
       language: ${{ steps.detect.outputs.language }}
@@ -54,11 +37,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5  # Updated to latest version
-        with:
-          python-version: '3.9'
 
       - name: Detect Project Type
         id: detect
@@ -88,3 +66,40 @@ jobs:
         run: |
           NODE_VERSION=$(jq -r '.engines.node // "16"' package.json)
           echo "version=$NODE_VERSION" >> $GITHUB_OUTPUT
+  
+
+  run-tests:
+    name: Run Tests
+    needs: generate-pipeline
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        if: needs.generate-pipeline.outputs.language == 'nodejs'
+        uses: actions/setup-node@v4  # Updated version
+        with:
+          node-version: ${{ needs.generate-pipeline.outputs.node_version }}
+
+      - name: Run Node.js Tests
+        if: needs.generate-pipeline.outputs.language == 'nodejs'
+        run: |
+          echo "Running Node.js tests"
+          npm install
+          npm run lint
+          npm run test
+
+      - name: Set up Java
+        if: needs.generate-pipeline.outputs.language == 'java'
+        uses: actions/setup-java@v4  # Updated version
+        with:
+          distribution: 'temurin'
+          java-version: ${{ needs.generate-pipeline.outputs.java_version }}
+
+      - name: Run Java Tests
+        if: needs.generate-pipeline.outputs.language == 'java'
+        run: |
+          echo "Running Java tests"
+          mvn clean verify
+          

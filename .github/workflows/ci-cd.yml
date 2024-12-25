@@ -52,7 +52,10 @@ jobs:
           python-version: '3.9'
 
       - name: Install Python dependencies
+        run: pip install -r scripts/requirements.txt
+      
+      - name: Set up
         run: |
-          pip install -r scripts/requirements.txt
-          cd ..
-          python scripts/detect_language.py
+          ls l
+          cd scripts
+          python detect_project.py

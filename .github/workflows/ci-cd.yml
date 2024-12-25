@@ -109,13 +109,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: run-tests
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: arn:aws:iam::992382383822:role/github-actions-runner
-          audience: sts.amazonaws.com
-          aws-region: us-east-1
-
       - name: Checkout Workflow Repository
         uses: actions/checkout@v4
         with:

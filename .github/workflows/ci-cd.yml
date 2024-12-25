@@ -54,12 +54,6 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r scripts/requirements.txt
 
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          repository: uj-cpu-dev/deploy-to-aws-ecr
-          ref: main
-
       - name: Detect Project Type
         id: detect
-        run: python scripts/detect_language.py
+        run: ls -l

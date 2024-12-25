@@ -61,4 +61,4 @@ jobs:
           #!/bin/bash
           ls -l
           cd scripts
-          python detect_project.py
+          python detect_projects.py

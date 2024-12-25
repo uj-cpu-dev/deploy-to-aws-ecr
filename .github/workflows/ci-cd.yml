@@ -19,6 +19,7 @@ env:
   AWS_REGION: us-east-1
   IMAGE_REPO_NAME: my-java-app
   AWS_ACCOUNT_ID: 992382383822
+  IAM_ROLE: github-actions-runner
 
 permissions:
   contents: read
@@ -130,5 +131,13 @@ jobs:
       - name: Terraform Init
         working-directory: terraform
         run: |
-          echo "Listing all directories:"
-          ls -la
+          set -eux
+          terraform init -upgrade -reconfigure \
+            -backend-config='skip_metadata_api_check=true' \
+            -backend-config='skip_region_validation=true' \
+            -backend-config='skip_credentials_validation=true' \
+            -backend-config='region=${{ env.AWS_REGION }}' \
+            -backend-config='bucket=${{ inputs.backend_s3_bucket }}' \
+            -backend-config='key=docker-ecr/terraform-${{ env.IMAGE_REPO_NAME }}.tfstate' \
+            -backend-config='dynamodb_table=${{ inputs.backend_dynamodb_table }}' \
+            -backend-config='role_arn=arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ env.IAM_ROLE }}'

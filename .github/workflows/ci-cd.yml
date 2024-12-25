@@ -24,7 +24,6 @@ env:
   IMAGE_REPO_NAME: my-java-app
   AWS_ACCOUNT_ID: 992382383822
   IAM_ROLE: github-actions-runner
-  DEVOPS_DIR: scripts
 
 permissions:
   contents: read
@@ -46,7 +45,6 @@ jobs:
         with:
           repository: uj-cpu-dev/deploy-to-aws-ecr
           ref: main
-          path: ${{ env.DEVOPS_DIR }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -54,9 +52,6 @@ jobs:
           python-version: '3.9'
 
       - name: Install Python dependencies
-        run: pip install -r ${{ env.DEVOPS_DIR }}/scripts/requirements.txt
-
-      - name: Detect Project Type
-        id: detect
-        shell: sh
-        run: python ${{ env.DEVOPS_DIR }}/scripts/detect_language.py
+        run: |
+          pip install -r scripts/requirements.txt
+          python scripts/detect_language.py

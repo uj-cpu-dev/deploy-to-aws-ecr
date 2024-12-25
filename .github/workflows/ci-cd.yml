@@ -138,5 +138,5 @@ jobs:
             -backend-config='skip_credentials_validation=true' \
             -backend-config='region=${{ env.AWS_REGION }}' \
             -backend-config='bucket=${{ inputs.backend_s3_bucket }}' \
-            -backend-config='key=docker-ecr/terraform-${{ env.IMAGE_REPO_NAME }}.tfstate' \
+            -backend-config='key=docker-ecr-terraform-${{ env.IMAGE_REPO_NAME }}.tfstate' \
             -backend-config='dynamodb_table=${{ inputs.backend_dynamodb_table }}'

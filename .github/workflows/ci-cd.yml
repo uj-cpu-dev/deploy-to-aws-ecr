@@ -55,3 +55,8 @@ jobs:
 
       - name: Install Python dependencies
         run: pip install -r ${{ env.DEVOPS_DIR }}/scripts/requirements.txt
+
+      - name: Detect Project Type
+        id: detect
+        shell: sh
+        run: python ${{ env.DEVOPS_DIR }}/scripts/detect_language.py

@@ -140,3 +140,14 @@ jobs:
             -backend-config='bucket=${{ inputs.backend_s3_bucket }}' \
             -backend-config='key=docker-ecr-terraform-${{ env.IMAGE_REPO_NAME }}.tfstate' \
             -backend-config='dynamodb_table=${{ inputs.backend_dynamodb_table }}'
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: |
+          set -eux
+          terraform apply -auto-approve \
+          -var="region=${{ env.AWS_REGION }}" \
+          -var="bucket=${{ inputs.backend_s3_bucket }}" \
+          -var="key=docker-ecr-terraform-${{ env.IMAGE_REPO_NAME }}.tfstate" \
+          -var="dynamodb_table=${{ inputs.backend_dynamodb_table }}" \
+          -var="role_arn=arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ env.IAM_ROLE }}"

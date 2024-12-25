@@ -55,8 +55,8 @@ jobs:
         run: pip install -r scripts/requirements.txt
       
       - name: Set up
-        working-directory: scripts
         id: detect
         run: |
           ls -l
           pwd
+          python3 scripts/detect_script.py

@@ -56,6 +56,6 @@ jobs:
       
       - name: Set up
         run: |
-          ls l
+          ls -l
           cd scripts
           python detect_project.py

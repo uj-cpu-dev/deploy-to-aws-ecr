@@ -56,5 +56,6 @@ jobs:
 
       - name: Detect Project Type
         id: detect
-        working-directory: ./scripts
+        shell: sh
+        working-directory: /scripts
         run: python detect_language.py

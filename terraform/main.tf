@@ -13,6 +13,7 @@ resource "null_resource" "create_repository" {
   provisioner "local-exec" {
     command = "aws ecr create-repository --repository-name ${var.repository_name}"
     # Only run if the data is empty (i.e., repository doesn't exist)
-    when = data.aws_ecr_repository.existing.empty
+    # Use conditional expression instead of "when"
+    if_condition = data.aws_ecr_repository.existing.empty
   }
 }

@@ -55,6 +55,8 @@ jobs:
         run: pip install -r scripts/requirements.txt
       
       - name: Set up
+        shell: sh
+        id: detect
         run: |
           #!/bin/bash
           ls -l

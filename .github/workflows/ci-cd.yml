@@ -126,9 +126,9 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: false
-        working-directory: terraform
 
       - name: Terraform Init
+        working-directory: terraform
         run: |
           echo "Listing all directories:"
           ls -la

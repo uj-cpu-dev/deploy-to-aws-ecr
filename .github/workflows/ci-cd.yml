@@ -45,6 +45,7 @@ jobs:
         with:
           repository: uj-cpu-dev/deploy-to-aws-ecr
           ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -57,5 +58,4 @@ jobs:
       - name: Set up
         id: detect
         working-directory: scripts
-        run:
-          python3 detect_script.py
+        run: python3 detect_script.py

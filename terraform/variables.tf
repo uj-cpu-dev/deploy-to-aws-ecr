@@ -22,3 +22,8 @@ variable "dynamodb_table" {
   type = string
   default= ""
 }
+
+variable "repository_name" {
+  type = string
+  default= ""
+}

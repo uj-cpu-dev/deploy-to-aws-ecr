@@ -58,7 +58,5 @@ jobs:
         shell: sh
         id: detect
         run: |
-          #!/bin/bash
           ls -l
-          cd scripts
-          python detect_projects.py
+          pwd

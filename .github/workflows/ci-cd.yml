@@ -152,3 +152,36 @@ jobs:
           -var="dynamodb_table=${{ inputs.backend_dynamodb_table }}" \
           -var="role_arn=arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ env.IAM_ROLE }}" \
           -var="repository_name=${{ env.IMAGE_REPO_NAME }}"
+
+
+  push-to-ecr:
+    name: Build Tag and Push to Amazon ECR
+    needs: terraform-provision
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::992382383822:role/github-actions-runner
+          audience: sts.amazonaws.com
+          aws-region: us-east-1
+
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: private
+          skip-logout: false
+
+      - name: Generate Image Tag
+        run: |
+          COMMIT_SHA=$(git rev-parse --short HEAD)  # Get first 7 characters of commit SHA
+          IMAGE_TAG=feature-branch-${COMMIT_SHA:0:7}
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Push Docker Image
+        run: |
+          docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+          docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG

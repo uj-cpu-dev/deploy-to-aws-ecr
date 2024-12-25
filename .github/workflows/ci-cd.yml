@@ -52,8 +52,10 @@ jobs:
           python-version: '3.9'
 
       - name: Install Python dependencies
+        working-directory: scripts
         run: pip install -r scripts/requirements.txt
 
       - name: Detect Project Type
+        working-directory: scripts
         id: detect
         run: python scripts/detect_language.py

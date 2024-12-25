@@ -56,7 +56,8 @@ jobs:
       
       - name: Set up
         id: detect
+        working-directory: scripts
         run: |
           ls -l
           pwd
-          python3 scripts/detect_script.py
+          python detect_script.py

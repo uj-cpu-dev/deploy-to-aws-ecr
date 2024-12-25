@@ -24,6 +24,10 @@ variable "dynamodb_table" {
 }
 
 variable "repository_name" {
-  type = string
-  default= ""
+  description = "Name of the ECR repository"
+  type        = string
+  validation {
+    condition     = length(var.repository_name) >= 2 && length(var.repository_name) <= 256
+    error_message = "Repository name must be between 2 and 256 characters long."
+  }
 }

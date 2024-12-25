@@ -1,3 +1,3 @@
 output "repository_exists" {
-  value = length(data.aws_ecr_repository.existing) > 0 ? "exists" : "created"
+  value = length(try([data.aws_ecr_repository.existing.repository_url], [])) > 0 ? "exists" : "created"
 }

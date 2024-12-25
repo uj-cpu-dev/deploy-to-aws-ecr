@@ -1,7 +1,3 @@
-output "aws_ecr_repo_url" {
-  value = aws_ecr_repository.repository.repository_url
-}
-
-output "aws_ecr_repo_arn" {
-  value = aws_ecr_repository.repository.arn
+output "repository_exists" {
+  value = length(data.aws_ecr_repository.existing) > 0 ? "exists" : "created"
 }

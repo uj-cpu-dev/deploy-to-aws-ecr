@@ -1,19 +1,18 @@
 data "aws_caller_identity" "current" {}
 
+# Data block to check if the repository exists
 data "aws_ecr_repository" "existing" {
+  count = length(
+    try(
+      [aws_ecr_repository.existing.repository_url],
+      []
+    )
+  )
   name = var.repository_name
 }
 
-resource "null_resource" "create_repository" {
-  triggers {
-    # Check if the repository exists (data can be empty)
-    provider = data.aws_ecr_repository.existing.empty == false ? aws.ecr : null
-  }
-
-  provisioner "local-exec" {
-    command = "aws ecr create-repository --repository-name ${var.repository_name}"
-    # Only run if the data is empty (i.e., repository doesn't exist)
-    # Use conditional expression instead of "when"
-    if_condition = data.aws_ecr_repository.existing.empty
-  }
+# Resource block to create the repository if it does not exist
+resource "aws_ecr_repository" "new" {
+  count = length(data.aws_ecr_repository.existing) == 0 ? 1 : 0
+  name  = var.repository_name
 }

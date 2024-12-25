@@ -17,3 +17,8 @@ variable "key" {
   type = string
   default= ""
 }
+
+variable "dynamodb_table" {
+  type = string
+  default= ""
+}

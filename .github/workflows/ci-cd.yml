@@ -117,6 +117,18 @@ jobs:
           audience: sts.amazonaws.com
           aws-region: us-east-1
 
+      - name: Check and Create ECR Repository
+        run: |
+          REPOSITORY_NAME="${{ env.IMAGE_REPO_NAME }}"
+            
+          # Check if the repository exists
+          if aws ecr describe-repositories --repository-names "$REPOSITORY_NAME" >/dev/null 2>&1; then
+            echo "Repository $REPOSITORY_NAME already exists."
+          else
+            echo "Repository $REPOSITORY_NAME does not exist. Creating it now."
+            aws ecr create-repository --repository-name "$REPOSITORY_NAME"
+          fi
+
       - name: Checkout Workflow Repository
         uses: actions/checkout@v4
         with:

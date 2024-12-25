@@ -128,15 +128,6 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - name: Prepare ECR Repo Name
-        run: |
-          set -eux
-          repo="${GITHUB_REPOSITORY,,}"
-          repo="${repo//\//_}"
-          valid_repo="${repo:0:256}"
-          echo "IMAGE_REPO_NAME=${valid_repo}" >> $GITHUB_ENV
-          echo "Passed IMAGE_REPO_NAME: ${{ env.IMAGE_REPO_NAME }}"
-
       - name: Terraform Init
         working-directory: terraform
         run: |
@@ -160,4 +151,4 @@ jobs:
           -var="key=docker-ecr-terraform-${{ env.IMAGE_REPO_NAME }}.tfstate" \
           -var="dynamodb_table=${{ inputs.backend_dynamodb_table }}" \
           -var="role_arn=arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ env.IAM_ROLE }}" \
-          -var="repository_name=$IMAGE_REPO_NAME"
+          -var="repository_name=${{ env.IMAGE_REPO_NAME }}"

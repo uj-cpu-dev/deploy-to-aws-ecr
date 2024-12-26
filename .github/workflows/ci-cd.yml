@@ -40,27 +40,27 @@ jobs:
       - name: Checkout Current Repository
         uses: actions/checkout@v4
 
-      - name: Clone Another Repository Globally
+      - name: Clone Another Repository Globally (Adjusted Path)
         run: |
-          git clone https://github.com/uj-cpu-dev/deploy-to-aws-ecr.git /tmp/deploy-to-aws-ecr
+          git clone https://github.com/uj-cpu-dev/deploy-to-aws-ecr.git global-repository  # Clone directly into a folder
 
       - name: Upload Cloned Repository as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: global-repository
-          path: /tmp/deploy-to-aws-ecr
+          name: global-repository  # Same name as the folder
+          path: global-repository  # Upload the folder itself
 
   list-repositories:
     name: List Repositories Content
     runs-on: ubuntu-latest
-    needs: setup
+    needs: setup  # Wait for the setup job to finish
 
     steps:
       - name: Download Global Repository Artifact
         uses: actions/download-artifact@v4
         with:
           name: global-repository
-          path: ./  # Explicitly specify the path to download the artifact to the current directory
+          path: ./global-repository  # Download to the current directory
 
       - name: List Contents of the Current Repository
         run: |

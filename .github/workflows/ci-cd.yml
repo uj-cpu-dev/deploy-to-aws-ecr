@@ -60,6 +60,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: global-repository
+          path: ./  # Explicitly specify the path to download the artifact to the current directory
 
       - name: List Contents of the Current Repository
         run: |

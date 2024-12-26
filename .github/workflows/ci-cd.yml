@@ -79,4 +79,4 @@ jobs:
       - name: Set up
         id: detect
         working-directory: cloned-repo/scripts
-        run: python detect_project.py repository-bundle
+        run: ls repository-bundle

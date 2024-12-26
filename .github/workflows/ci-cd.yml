@@ -32,6 +32,19 @@ permissions:
   actions: write
 
 jobs:
+  bundle-repository:
+      name: Bundle Repository
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
+
+        - name: Upload Repository as Artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: repository-bundle
+            path: . 
+
   generate-pipeline:
     name: Generate Pipeline
     runs-on: ubuntu-latest
@@ -40,6 +53,11 @@ jobs:
       java_version: ${{ steps.detect.outputs.java_version }}
       node_version: ${{ steps.detect.outputs.node_version }}
     steps:
+      - name: Download Repository Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: repository-bundle
+
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
@@ -54,10 +72,10 @@ jobs:
           python-version: '3.9'
 
       - name: Install Python dependencies
-        working-directory: cloned-repo
-        run: pip install -r scripts/requirements.txt
+        working-directory: cloned-repo/scripts
+        run: pip install -r requirements.txt
       
       - name: Set up
         id: detect
         working-directory: cloned-repo/scripts
-        run: python detect_project.py
+        run: python detect_project.py repository-bundle

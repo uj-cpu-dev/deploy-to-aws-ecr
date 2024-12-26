@@ -1,23 +1,22 @@
 import os
+import sys
 
-def list_files(directory):
-    try:
-        # List all entries in the directory
-        entries = os.listdir(directory)
-        # Filter out directories, keeping only files
-        files = [entry for entry in entries if os.path.isfile(os.path.join(directory, entry))]
-        # Print the list of files
-        for file in files:
-            print(file)
-    except FileNotFoundError:
-        print(f"The directory '{directory}' does not exist.")
-    except PermissionError:
-        print(f"Permission denied to access '{directory}'.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+def detect_language(directory):
+    # Implement your language detection logic here
+    # For demonstration, we'll use placeholder values
+    language = "Python"
+    java_version = "11"
+    node_version = "14"
+
+    # Set outputs
+    with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+        print(f'language={language}', file=fh)
+        print(f'java_version={java_version}', file=fh)
+        print(f'node_version={node_version}', file=fh)
 
 if __name__ == "__main__":
-    # Specify the directory you want to list
-    # For the current directory, use '.'
-    directory_to_list = '.'
-    list_files(directory_to_list)
+    if len(sys.argv) != 2:
+        print("Usage: python detect_project.py <directory>")
+        sys.exit(1)
+    directory = sys.argv[1]
+    detect_language(directory)

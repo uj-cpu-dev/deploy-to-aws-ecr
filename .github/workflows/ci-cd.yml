@@ -60,4 +60,4 @@ jobs:
       - name: Set up
         id: detect
         working-directory: cloned-repo/scripts
-        run: ls -l
+        run: python detect_project.py

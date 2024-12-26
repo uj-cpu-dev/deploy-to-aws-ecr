@@ -38,12 +38,26 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          repository: uj-cpu-dev/deploy-to-aws-ecr
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: cloned-repo 
 
-      - name: Upload Repository as Artifact
+      - name: Checkout Current Repository
+        uses: actions/checkout@v4
+
+      - name: Create Bundle
+        run: |
+          mkdir -p bundled_repository
+          cp -r cloned-repo/* bundled_repository/ 
+          cp -r ./* bundled_repository/ 
+
+      - name: Upload Repository Bundle
         uses: actions/upload-artifact@v4
         with:
           name: repository-bundle
-          path: . 
+          path: bundled_repository
 
   generate-pipeline:
     name: Generate Pipeline
@@ -54,29 +68,12 @@ jobs:
       java_version: ${{ steps.detect.outputs.java_version }}
       node_version: ${{ steps.detect.outputs.node_version }}
     steps:
-      - name: Download Repository Artifact
+      - name: Download Bundle
         uses: actions/download-artifact@v4
         with:
           name: repository-bundle
-
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          repository: uj-cpu-dev/deploy-to-aws-ecr
-          ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
-          path: cloned-repo
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Install Python dependencies
-        working-directory: cloned-repo/scripts
-        run: pip install -r requirements.txt
+          path: downloaded-bundle
       
-      - name: Set up
-        id: detect
-        working-directory: cloned-repo/scripts
-        run: ls repository-bundle
+      - name: Use Files from Bundle
+        working-directory: downloaded-bundle
+        run: ls -l

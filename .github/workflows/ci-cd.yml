@@ -35,29 +35,29 @@ jobs:
   bundle-repository:
     name: Bundle Repository
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout Current Repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Second Repository
         uses: actions/checkout@v4
         with:
           repository: uj-cpu-dev/deploy-to-aws-ecr
           ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
-          path: cloned-repo 
 
-      - name: Checkout Current Repository
-        uses: actions/checkout@v4
-
-      - name: Create Bundle
+      - name: Create Bundle Folder
         run: |
-          mkdir -p bundled_repository
-          cp -r cloned-repo/* bundled_repository/ 
-          cp -r ./* bundled_repository/ 
+          mkdir combined-repository
+          cp -r ./* combined-repository/
+          cp -r /path/to/second/repository/* combined-repository/
 
-      - name: Upload Repository Bundle
+      - name: Upload Combined Repository as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: repository-bundle
-          path: bundled_repository
+          path: ./combined-repository
 
   generate-pipeline:
     name: Generate Pipeline
@@ -72,8 +72,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: repository-bundle
-          path: downloaded-bundle
       
       - name: Use Files from Bundle
-        working-directory: downloaded-bundle
-        run: ls -l
+        run: |
+          echo "Listing the contents of the bundled repository:"
+          ls -R ./repository-bundle/

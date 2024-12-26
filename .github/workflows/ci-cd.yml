@@ -32,50 +32,41 @@ permissions:
   actions: write
 
 jobs:
-  bundle-repository:
-    name: Bundle Repository
+  setup:
+    name: Clone Global Repository
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Current Repository
         uses: actions/checkout@v4
 
-      - name: Checkout Second Repository
-        uses: actions/checkout@v4
-        with:
-          repository: uj-cpu-dev/deploy-to-aws-ecr
-          ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Bundle Folder
+      - name: Clone Another Repository Globally
         run: |
-          mkdir combined-repository
-          # Copy the contents of the current repository (excluding combined-repository)
-          find . -maxdepth 1 ! -name 'combined-repository' -exec cp -r {} combined-repository/ \;
-          # Copy the contents of the second repository (excluding combined-repository)
-          find /path/to/second/repository -maxdepth 1 ! -name 'combined-repository' -exec cp -r {} combined-repository/ \;
+          git clone https://github.com/uj-cpu-dev/deploy-to-aws-ecr.git /tmp/deploy-to-aws-ecr
 
-      - name: Upload Combined Repository as Artifact
+      - name: Upload Cloned Repository as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: repository-bundle
-          path: ./combined-repository
+          name: global-repository
+          path: /tmp/deploy-to-aws-ecr
 
-  generate-pipeline:
-    name: Generate Pipeline
+  list-repositories:
+    name: List Repositories Content
     runs-on: ubuntu-latest
-    needs: bundle-repository
-    outputs:
-      language: ${{ steps.detect.outputs.language }}
-      java_version: ${{ steps.detect.outputs.java_version }}
-      node_version: ${{ steps.detect.outputs.node_version }}
+    needs: setup
+
     steps:
-      - name: Download Bundle
+      - name: Download Global Repository Artifact
         uses: actions/download-artifact@v4
         with:
-          name: repository-bundle
-      
-      - name: Use Files from Bundle
+          name: global-repository
+
+      - name: List Contents of the Current Repository
         run: |
-          echo "Listing the contents of the bundled repository:"
-          ls -R ./repository-bundle/
+          echo "Listing contents of the current repository:"
+          ls -R .  # Lists the content of the current repository
+
+      - name: List Contents of the Global Repository
+        run: |
+          echo "Listing contents of the global repository:"
+          ls -R ./global-repository  # Lists the content of the downloaded global repository

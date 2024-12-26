@@ -50,8 +50,10 @@ jobs:
       - name: Create Bundle Folder
         run: |
           mkdir combined-repository
-          cp -r ./* combined-repository/
-          cp -r /path/to/second/repository/* combined-repository/
+          # Copy the contents of the current repository (excluding combined-repository)
+          find . -maxdepth 1 ! -name 'combined-repository' -exec cp -r {} combined-repository/ \;
+          # Copy the contents of the second repository (excluding combined-repository)
+          find /path/to/second/repository -maxdepth 1 ! -name 'combined-repository' -exec cp -r {} combined-repository/ \;
 
       - name: Upload Combined Repository as Artifact
         uses: actions/upload-artifact@v4

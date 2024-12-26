@@ -57,6 +57,12 @@ jobs:
 
     steps:
       - name: Download Global Repository Artifact
+        uses: actions/checkout@v4
+    
+      - name: Check Repository
+        run: ls -la
+
+      - name: Download Global Repository Artifact
         uses: actions/download-artifact@v4
         with:
           name: global-repository

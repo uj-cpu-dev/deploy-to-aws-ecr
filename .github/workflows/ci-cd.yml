@@ -80,6 +80,7 @@ jobs:
 
       - name: Install Python Dependencies
         run: |
+          pip install --upgrade pip
           pip install -r global-repository/scripts/requirements.txt
 
       - name: Run Language Detection Script

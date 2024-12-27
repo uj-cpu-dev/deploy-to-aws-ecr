@@ -70,4 +70,7 @@ jobs:
           path: global-repository
 
       - name: List Contents of Merged Repository
-        run: ls -R global-repository
+        run: |
+          ls -R global-repository
+          cd global-repository/scripts
+          python3 detect_project.py

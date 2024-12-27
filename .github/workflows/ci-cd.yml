@@ -56,7 +56,7 @@ jobs:
         with:
           name: merged-repository
           path: global-repository
-  
+
   list-contents:
     name: List Contents of Merged Repository
     runs-on: ubuntu-latest
@@ -72,5 +72,16 @@ jobs:
       - name: List Contents of Merged Repository
         run: |
           ls -R global-repository
-          cd global-repository/scripts
-          python3 detect_project.py
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -r global-repository/scripts/requirements.txt
+
+      - name: Run Language Detection Script
+        run: |
+          python global-repository/scripts/detect_project.py

@@ -1,12 +1,14 @@
 import subprocess
 import sys
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def run_tests(language):
+def run_tests(language, repo_path):
+    os.chdir(repo_path)
     try:
         if language == 'java':
             logger.info("Running Java tests using Maven...")
@@ -29,8 +31,9 @@ def run_tests(language):
         sys.exit(1)
 
 if __name__ == "__main__":
+    repo_path = os.path.abspath("global-repository")
     if len(sys.argv) != 2:
         logger.error("Usage: python run_tests.py <language>")
         sys.exit(1)
     detected_language = sys.argv[1]
-    run_tests(detected_language)
+    run_tests(detected_language, repo_path)

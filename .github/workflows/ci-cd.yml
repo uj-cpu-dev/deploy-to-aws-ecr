@@ -60,6 +60,8 @@ jobs:
 
   analyze-repository:  # More descriptive name for analyzing the merged repository
     name: Analyze Merged Repository
+    outputs:
+      language: ${{ steps.detect.outputs.language }}
     runs-on: ubuntu-latest
     needs: prepare-repository  # Specify the dependency on the previous job
 
@@ -75,10 +77,26 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Python Dependencies
-        run: |
-          pip3 install -r global-repository/scripts/requirements.txt
-
       - name: Run Language Detection Script
+        id: detect
         run: |
           python global-repository/scripts/detect_project.py
+
+  test:
+      runs-on: ubuntu-latest
+      needs: analyze-repository
+      steps:
+        - name: Download Merged Repository Artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: merged-repository
+            path: global-repository
+
+        - name: Set up Python
+          uses: actions/setup-python@v4
+          with:
+            python-version: '3.9'
+
+        - name: Set Up Environment Based on Detected Language
+          run: |
+            python global-repository/scripts/setup_environment.py ${{ needs.analyze-repository.outputs.language }}

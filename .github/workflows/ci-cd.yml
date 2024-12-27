@@ -56,3 +56,18 @@ jobs:
         with:
           name: merged-repository
           path: global-repository
+  
+  list-contents:
+    name: List Contents of Merged Repository
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Download Merged Repository Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: global-repository
+          path: global-repository
+
+      - name: List Contents of Merged Repository
+        run: ls -R global-repository

@@ -12,6 +12,7 @@ def run_tests(language, repo_path):
     try:
         if language == 'java':
             logger.info("Running Java tests using Maven...")
+            subprocess.run(['sudo', 'apt-get', 'install', '-y', 'maven'], check=True)
             subprocess.run(['mvn', 'clean', 'verify'], check=True)
         elif language == 'nodejs':
             logger.info("Running Node.js tests using npm...")

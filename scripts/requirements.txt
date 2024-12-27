@@ -1,4 +1,4 @@
 boto3
 requests
 pandas
-guesslang
+guesslang=2.0.1

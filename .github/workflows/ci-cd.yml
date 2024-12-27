@@ -66,7 +66,7 @@ jobs:
       - name: Download Merged Repository Artifact
         uses: actions/download-artifact@v4
         with:
-          name: global-repository
+          name: merged-repository
           path: global-repository
 
       - name: List Contents of Merged Repository

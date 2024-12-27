@@ -33,45 +33,27 @@ permissions:
 
 jobs:
   setup:
-    name: Clone and Merge Repositories
+    name: Clone Global Repository
     runs-on: ubuntu-latest
-    outputs:
-      artifact-path: ${{ steps.upload.outputs.artifact-path }}
-
+    
     steps:
       - name: Checkout Current Repository
         uses: actions/checkout@v4
 
-      - name: Create Directory for Global Repository
-        run: mkdir global-repository
-
-      - name: Clone Global Repository
+      - name: Create Global Repository Folder
         run: |
-          git clone https://github.com/uj-cpu-dev/deploy-to-aws-ecr.git global-repository
+          mkdir global-repository  # Create the folder
 
-      - name: Copy Files from Current Repository to Global Repository
+      - name: Copy Current Repository Files
         run: |
-          cp -r ./* global-repository/
-          cp -r ./.github global-repository/  # Include hidden directories if needed
+          cp -r ./* global-repository/  # Copy all files from current repository
 
-      - name: Upload Merged Repository as Artifact
-        id: upload
+      - name: Clone Another Repository Globally (Adjusted Path)
+        run: |
+          git clone https://github.com/uj-cpu-dev/deploy-to-aws-ecr.git global-repository/external-repo  # Clone into a subfolder
+
+      - name: Upload Cloned Repository as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: global-repository
-          path: global-repository
-
-  list-contents:
-    name: List Contents of Merged Repository
-    runs-on: ubuntu-latest
-    needs: setup
-
-    steps:
-      - name: Download Merged Repository Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: global-repository
-          path: global-repository
-
-      - name: List Contents of Merged Repository
-        run: ls -R global-repository
+          name: global-repository  # Same name as the folder
+          path: global-repository  # Upload the folder itself

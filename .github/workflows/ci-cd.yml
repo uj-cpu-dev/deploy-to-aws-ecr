@@ -33,27 +33,26 @@ permissions:
 
 jobs:
   setup:
-    name: Clone Global Repository
+    name: Clone and Merge Repositories
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Current Repository
         uses: actions/checkout@v4
 
-      - name: Create Global Repository Folder
-        run: |
-          mkdir global-repository  # Create the folder
+      - name: Create Directory for Global Repository
+        run: mkdir global-repository
 
-      - name: Copy Current Repository Files
+      - name: Clone Global Repository
         run: |
-          cp -r ./* global-repository/  # Copy all files from current repository
+          git clone https://github.com/uj-cpu-dev/deploy-to-aws-ecr.git global-repository
 
-      - name: Clone Another Repository Globally (Adjusted Path)
+      - name: Copy Files from Current Repository to Global Repository
         run: |
-          git clone https://github.com/uj-cpu-dev/deploy-to-aws-ecr.git global-repository/external-repo  # Clone into a subfolder
+          rsync -av --exclude='global-repository' . global-repository/
 
-      - name: Upload Cloned Repository as Artifact
+      - name: Upload Merged Repository as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: global-repository  # Same name as the folder
-          path: global-repository  # Upload the folder itself
+          name: merged-repository
+          path: global-repository

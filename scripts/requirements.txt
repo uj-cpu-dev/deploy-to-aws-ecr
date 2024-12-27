@@ -1,4 +1,5 @@
 boto3
 requests
 pandas
+tensorflow>=2.2.0
 guesslang>=2.0.0

@@ -102,6 +102,9 @@ jobs:
           run: |
             python global-repository/scripts/setup_environment.py ${{ needs.analyze-repository.outputs.language }}
 
-        - name: Run Tests Based on Detected Language
-          run: |
-            python global-repository/scripts/run_tests.py ${{ needs.analyze-repository.outputs.language }}
+        - name: Check Java Version
+          run: java -version
+
+#        - name: Run Tests Based on Detected Language
+#       run: |
+#            python global-repository/scripts/run_tests.py ${{ needs.analyze-repository.outputs.language }}

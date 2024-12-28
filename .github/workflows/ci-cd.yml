@@ -98,6 +98,12 @@ jobs:
           with:
             python-version: '3.9'
 
+        - name: Set up Java
+          uses: actions/setup-java@v4  # Updated version
+          with:
+           distribution: 'temurin'
+           java-version: 17
+
 #        - name: Set Up Environment Based on Detected Language
 #          run: |
 #            python global-repository/scripts/setup_environment.py

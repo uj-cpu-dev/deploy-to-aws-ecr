@@ -98,13 +98,10 @@ jobs:
           with:
             python-version: '3.9'
 
-        - name: Set Up Environment Based on Detected Language
+#        - name: Set Up Environment Based on Detected Language
+#          run: |
+#            python global-repository/scripts/setup_environment.py
+
+        - name: Run Tests Based on Detected Language
           run: |
-            python global-repository/scripts/setup_environment.py ${{ needs.analyze-repository.outputs.language }}
-
-        - name: Check Java Version
-          run: java -version
-
-#        - name: Run Tests Based on Detected Language
-#       run: |
-#            python global-repository/scripts/run_tests.py ${{ needs.analyze-repository.outputs.language }}
+            python global-repository/scripts/run_tests.py ${{ needs.analyze-repository.outputs.language }}

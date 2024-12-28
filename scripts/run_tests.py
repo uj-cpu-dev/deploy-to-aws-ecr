@@ -7,12 +7,16 @@ import os
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def run_tests(language, repo_path):
+def run_tests(language, repo_path, java_version=None):
     os.chdir(repo_path)
     try:
         if language == 'java':
-            logger.info("Running Java tests using Maven...")
-            subprocess.run(['sudo', 'apt-get', 'install', '-y', 'maven'], check=True)
+            logger.info(f"Running Java tests using Maven with Java {java_version}...")
+
+            # Set the desired Java version using SDKMAN!
+            if java_version:
+                subprocess.run(f"source $HOME/.sdkman/bin/sdkman-init.sh && sdk use java {java_version}", shell=True, check=True)
+
             subprocess.run(['mvn', 'clean', 'verify'], check=True)
         elif language == 'nodejs':
             logger.info("Running Node.js tests using npm...")
@@ -33,8 +37,9 @@ def run_tests(language, repo_path):
 
 if __name__ == "__main__":
     repo_path = os.path.abspath("global-repository")
-    if len(sys.argv) != 2:
-        logger.error("Usage: python run_tests.py <language>")
+    if len(sys.argv) < 2:
+        logger.error("Usage: python run_tests.py <language> [java_version]")
         sys.exit(1)
     detected_language = sys.argv[1]
-    run_tests(detected_language, repo_path)
+    java_version = sys.argv[2] if len(sys.argv) > 2 else None
+    run_tests(detected_language, repo_path, java_version)

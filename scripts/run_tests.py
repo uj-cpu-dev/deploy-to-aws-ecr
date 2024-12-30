@@ -2,6 +2,7 @@ import subprocess
 import logging
 import os
 import sys
+import xml.etree.ElementTree as ET
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

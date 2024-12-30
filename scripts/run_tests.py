@@ -1,17 +1,35 @@
 import subprocess
-import sys
 import logging
 import os
+import sys
+import xml.etree.ElementTree as ET
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def run_tests(language, repo_path):
+    """
+    Runs tests based on the detected language, navigating to the specified repo path.
+
+    Args:
+        language: The detected programming language.
+        repo_path: The absolute path to the repository directory.
+    """
     os.chdir(repo_path)
     try:
         if language == 'java':
             logger.info("Running Java tests using Maven...")
+            # Get Java version from pom.xml
+            java_version = get_java_version_from_pom()
+
+            # Set up Java dynamically (using subprocess.run)
+            if java_version:
+                setup_java(java_version)
+            else:
+                logger.warning("Could not determine Java version from pom.xml. Using default.")
+                setup_java("11")  # Use a default Java version if not found
+
             subprocess.run(['mvn', 'clean', 'verify'], check=True)
         elif language == 'nodejs':
             logger.info("Running Node.js tests using npm...")
@@ -30,10 +48,44 @@ def run_tests(language, repo_path):
         logger.error(f"An error occurred during test execution: {e}")
         sys.exit(1)
 
+def get_java_version_from_pom():
+    """
+    Extracts the Java version from the pom.xml file.
+
+    Returns:
+        str: The Java version extracted from the pom.xml file, or None if not found.
+    """
+    try:
+        tree = ET.parse('pom.xml')
+        root = tree.getroot()
+        java_version = root.find('.//properties/java.version').text
+        return java_version
+    except FileNotFoundError:
+        logger.warning("pom.xml not found.")
+        return None
+    except Exception as e:
+        logger.error(f"Error extracting Java version from pom.xml: {e}")
+        return None
+
+def setup_java(java_version):
+    """
+    Sets up the Java environment using the specified version.
+    """
+    try:
+        subprocess.run(["java", "-version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    except subprocess.CalledProcessError:
+        logger.info(f"Installing Java {java_version}")
+        try:
+            subprocess.run(["sudo", "apt-get", "update"], check=True) 
+            subprocess.run(["sudo", "apt-get", "install", f"openjdk-{java_version}-jdk"], check=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to install Java {java_version}: {e}")
+            sys.exit(1)
+
 if __name__ == "__main__":
     repo_path = os.path.abspath("global-repository")
-    if len(sys.argv) != 2:
-        logger.error("Usage: python run_tests.py <language>")
-        sys.exit(1)
     detected_language = sys.argv[1]
+    if detected_language is None:
+        logger.error("Could not detect project language.")
+        sys.exit(1)
     run_tests(detected_language, repo_path)

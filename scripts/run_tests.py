@@ -14,7 +14,7 @@ def run_tests(language, repo_path):
         if language == 'java':
             logger.info("Running Java tests using Maven...")
             # Determine Java version from pom.xml (replace with your preferred method)
-            java_version = get_java_version_from_pom() 
+            java_version = 17
 
             # Set up Java dynamically
             if java_version:

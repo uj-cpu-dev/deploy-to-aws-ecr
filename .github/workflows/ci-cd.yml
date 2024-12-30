@@ -101,3 +101,14 @@ jobs:
         - name: Run Tests Based on Detected Language
           run: |
             python global-repository/scripts/run_tests.py ${{ needs.analyze-repository.outputs.language }}
+    
+        - name: Capture Maven Build Logs
+          run: |
+              mvn clean verify 2>&1 | tee maven_build_logs.txt
+            # This captures both standard output and standard error
+  
+        - name: Upload Maven Build Logs as Artifact
+          uses: actions/upload-artifact@v4
+          with:
+              name: maven-build-logs
+              path: maven_build_logs.txt

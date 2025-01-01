@@ -1,0 +1,32 @@
+name: Prepare Template
+
+on:
+ push:
+  branches: [main]
+
+jobs:
+  prepare:  # More descriptive name for preparing the combined repository
+    name: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Current Repository
+        uses: actions/checkout@v4
+
+      - name: Create Global Repository Directory
+        run: mkdir global-repository
+
+      - name: Clone External Repository
+        run: |
+          git clone https://github.com/uj-cpu-dev/deploy-to-aws-ecr.git global-repository
+
+      - name: Copy Project Files to Global Repository
+        run: |
+          # Copy only specific project files needed for detection (e.g., pom.xml, package.json)
+          rsync -av --exclude='global-repository' --include='pom.xml' --include='package.json' --include='build.gradle' --include='go.mod' --include='Gemfile' --include='pyproject.toml' --include='setup.py' . global-repository/
+
+      - name: Upload Merged Repository Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: merged-repository
+          path: global-repository

@@ -1,0 +1,27 @@
+name: Analyze Template
+
+on:
+ workflow_call:
+
+jobs:
+  repository:  # More descriptive name for preparing the combined repository
+    runs-on: ubuntu-latest
+    outputs:
+      language: ${{ steps.detect.outputs.language }}
+
+    steps:
+      - name: Download Merged Repository Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: merged-repository
+          path: global-repository
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Run Language Detection Script
+        id: detect
+        run: |
+          python global-repository/scripts/detect_project.py

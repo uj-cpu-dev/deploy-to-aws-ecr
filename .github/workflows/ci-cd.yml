@@ -32,38 +32,20 @@ permissions:
   actions: write
 
 jobs:
-  prepare-repository:  
+  prepare:  
     name: prepare # More descriptive name for preparing the combined repository
     uses: ./.github/workflows/prepare.yml
 
-  analyze-repository:  # More descriptive name for analyzing the merged repository
+  analyze:  # More descriptive name for analyzing the merged repository
     name: analyze
-    outputs:
-      language: ${{ steps.detect.outputs.language }}
-    runs-on: ubuntu-latest
-    needs: prepare-repository  # Specify the dependency on the previous job
+    uses: ./.github/workflows/analyze.yml
+    needs: prepare
 
-    steps:
-      - name: Download Merged Repository Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: merged-repository
-          path: global-repository
-
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Run Language Detection Script
-        id: detect
-        run: |
-          python global-repository/scripts/detect_project.py
 
   test:
       name: test
       runs-on: ubuntu-latest
-      needs: analyze-repository
+      needs: analyze
       steps:
         - name: Download Merged Repository Artifact
           uses: actions/download-artifact@v4

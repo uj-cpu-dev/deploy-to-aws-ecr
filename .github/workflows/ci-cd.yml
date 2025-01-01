@@ -32,7 +32,8 @@ permissions:
   actions: write
 
 jobs:
-  prepare-repository:  # More descriptive name for preparing the combined repository
+  prepare-repository:  
+    name: prepare # More descriptive name for preparing the combined repository
     uses: ./.github/workflows/prepare.yml
 
   analyze-repository:  # More descriptive name for analyzing the merged repository

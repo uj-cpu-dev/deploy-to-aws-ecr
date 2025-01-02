@@ -13,11 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-     - name: Download Merged Repository Artifact
-       uses: actions/download-artifact@v4
+     - name: Run Linguist
+       id: linguist
+       uses: lowlighter/metrics@latest
        with:
-          name: merged-repository
-          path: global-repository
+          plugin_languages: true
+
+     - name: Output Detected Languages
+       run: |
+          echo "Detected languages: ${{ steps.linguist.outputs.languages }}"
 
      - name: Set up Python
        uses: actions/setup-python@v4
@@ -25,18 +29,18 @@ jobs:
         python-version: '3.9'
 
      - name: Check Java Version
-       if: ${{ inputs.language == 'java' }}
+       if: ${{ steps.linguist.outputs.languages == 'java' }}
        id: java_info
        uses: YunaBraska/java-info-action@main
 
      - name: Set up Java
        uses: actions/setup-java@v4
-       if: ${{ inputs.language == 'java' }}
+       if: ${{ steps.linguist.outputs.languages == 'java' }}
        with:
          distribution: 'temurin'
          java-version: ${{ steps.java_info.outputs.java_version }}
 
      - name: Run Tests Based on Detected Language
        run: |
-         python global-repository/scripts/run_tests.py ${{ inputs.language == 'java' }}
+         python global-repository/scripts/run_tests.py ${{ steps.linguist.outputs.languages }}
 
